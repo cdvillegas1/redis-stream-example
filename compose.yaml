@@ -7,6 +7,8 @@ name: demo
 services:
   apigateway:
     image: devopsfaith/krakend
+    environment:
+      KRAKEND_LB_ALGORITHM: roundrobin
     ports:
       - "8090:8090"
     volumes:
