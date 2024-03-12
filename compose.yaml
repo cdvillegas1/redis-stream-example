@@ -1,0 +1,53 @@
+version: '3.8'
+name: demo
+
+# Cuando se crea una red en docker compose se debe verificar que se puedan comunicar entre contenedores dentro de la red
+# Cuando se agregan los host en el archivo de krakenD se utilizan los puertos del contenedor en este caso 8080, si ponen los que se exponen al host se genera un error
+# revisar como funciona la exposición de puertos y la network bridge
+services:
+  apigateway:
+    image: devopsfaith/krakend
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./krakend.json:/etc/krakend/krakend.json
+    container_name: krakend
+  backend1:
+    build: .
+    ports:
+      - "8081:8080"
+    container_name: backend1.be
+    depends_on: [ postgres, apigateway, redis ]
+  backend2:
+    build: .
+    ports:
+      - "8082:8080"
+    container_name: backend2.be
+    depends_on: [ postgres, apigateway, redis ]
+  backend3:
+    build: .
+    ports:
+      - "8083:8080"
+    container_name: backend3.be
+    depends_on: [ postgres, apigateway, redis ]
+  backend4:
+    build: .
+    ports:
+      - "8084:8080"
+    container_name: backend4.be
+    depends_on: [ postgres, apigateway, redis ]
+  postgres:
+    build: ./src/main/resources/persistence
+    environment:
+      POSTGRES_DB: company
+      POSTGRES_USER: random
+      POSTGRES_PASSWORD: code
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    container_name: my_database
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    container_name: redis-server
