@@ -1,0 +1,15 @@
+config:
+  target: "{{ $processEnvironment.API_URL }}"
+  http:
+    timeout: 60
+  phases:
+    - duration: 2
+      arrivalRate: 500
+
+scenarios:
+  - name: "Get users"
+    weight: 10
+    flow:
+      - get:
+          url: "/"
+          #delay: 100

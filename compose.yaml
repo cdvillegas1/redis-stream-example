@@ -19,25 +19,25 @@ services:
     ports:
       - "8081:8080"
     container_name: backend1.be
-    depends_on: [ postgres, apigateway, redis ]
+    depends_on: [ postgres, apigateway, redis-master ]
   backend2:
     build: .
     ports:
       - "8082:8080"
     container_name: backend2.be
-    depends_on: [ postgres, apigateway, redis ]
+    depends_on: [ postgres, apigateway, redis-master ]
   backend3:
     build: .
     ports:
       - "8083:8080"
     container_name: backend3.be
-    depends_on: [ postgres, apigateway, redis ]
+    depends_on: [ postgres, apigateway, redis-master ]
   backend4:
     build: .
     ports:
       - "8084:8080"
     container_name: backend4.be
-    depends_on: [ postgres, apigateway, redis ]
+    depends_on: [ postgres, apigateway, redis-master ]
   postgres:
     build: ./src/main/resources/persistence
     environment:
@@ -48,8 +48,33 @@ services:
     ports:
       - "5432:5432"
     container_name: my_database
-  redis:
-    image: redis:latest
+  redis-master:
+    image: 'bitnami/redis:latest'
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - "6379:6379"
-    container_name: redis-server
+    container_name: redis-master
+  redis-replica1:
+    image: "bitnami/redis:latest"
+    ports:
+      - "6380:6379"
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT_NUMBER=6379
+      - ALLOW_EMPTY_PASSWORD=yes
+  redis-replica2:
+    image: "bitnami/redis:latest"
+    ports:
+      - "6381:6379"
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT_NUMBER=6379
+      - ALLOW_EMPTY_PASSWORD=yes

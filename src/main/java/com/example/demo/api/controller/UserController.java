@@ -3,6 +3,7 @@ package com.example.demo.api.controller;
 import com.example.demo.api.dto.UserDTO;
 import com.example.demo.service.UserService;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import org.redisson.api.RLock;
 import org.redisson.api.RMapCache;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.SecureRandom;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +27,7 @@ import java.util.logging.Logger;
 public class UserController {
     private final UserService userService;
     Logger logger = Logger.getLogger(getClass().getName());
+    ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
     @Resource(name = "autoReverseIfNotConfirmedCache")
     private RMapCache<String, UserDTO> autoReverseIfNotConfirmedCache;
@@ -41,7 +45,9 @@ public class UserController {
 
         Optional<UserDTO> user = userService.getUser(id);
 
-        autoReverseIfNotConfirmedCache.putAsync(randomString, user.get(), 15, TimeUnit.SECONDS);
+        int variableTTL = 20;
+
+        autoReverseIfNotConfirmedCache.putAsync(randomString, user.get(), variableTTL, TimeUnit.SECONDS);
         logger.log(Level.INFO, "Key for redis: {0} ", randomString);
 
         return user.map(userDTO -> new ResponseEntity<>(userDTO, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -49,23 +55,38 @@ public class UserController {
 
     @PostConstruct
     public void configure() {
-
         logger.log(Level.WARNING, "[LACPI] Adding autoreverse listener...");
 
         autoReverseIfNotConfirmedCache.addListener((EntryExpiredListener<String, UserDTO>) event -> {
+            logger.log(Level.WARNING, "[LACPI] Inside the listener " + event.getKey());
+
             RLock lock = autoReverseIfNotConfirmedCache.getLock(event.getKey());
             boolean isLocked = lock.tryLock();
 
             if (isLocked) {
-                logger.log(Level.WARNING, "[LACPI] handling expired event..." + event.getKey());
-                // Perform actions requiring exclusive access to the event
-                // (e.g., update cache, send notification)
+                executor.submit(() -> {
 
-                lock.unlock();
-                // implementar un try..catch para manejar excepciones no controladas
-            } else {
-                logger.log(Level.WARNING, "[LACPI] No se pudo obtener el bloqueo del evento " + event.getKey());
+                    logger.log(Level.WARNING, "[LACPI] handling expired event " + event.getKey());
+                    // Perform actions requiring exclusive access to the event
+                    // (e.g., update cache, send notification)
+
+                    // Simulación de una tarea bloqueante
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    } finally {
+                        lock.unlock();
+                    }
+                });
             }
         });
+    }
+
+    @PreDestroy
+    public void cleanUp() {
+        // Código para liberar recursos o realizar tareas de limpieza
+        executor.shutdown();
     }
 }

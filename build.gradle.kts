@@ -8,7 +8,7 @@ group = "com.kushki"
 version = "0.0.1-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 configurations {
@@ -31,7 +31,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
 
-    implementation("org.redisson:redisson:3.21.3")
+    implementation("org.redisson:redisson:3.27.2")
 }
 
 tasks.withType<Test> {
