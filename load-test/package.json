@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "artillery": "^2.0.7"
+    "artillery": "^2.0.9"
   }
 }

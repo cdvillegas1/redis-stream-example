@@ -9,10 +9,7 @@
         {
           "url_pattern": "/user/{user}",
           "host": [
-            "http://backend1.be:8080",
-            "http://backend2.be:8080",
-            "http://backend3.be:8080",
-            "http://backend4.be:8080"
+            "http://backend1.be:8080"
           ]
         }
       ],

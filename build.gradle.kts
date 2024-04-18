@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.3.0-M2"
+    id("org.springframework.boot") version "3.2.4"
     id("io.spring.dependency-management") version "1.1.4"
 }
 
@@ -31,7 +31,10 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
 
-    implementation("org.redisson:redisson:3.27.2")
+    implementation("software.amazon.awssdk:dynamodb:2.25.22")
+    implementation("software.amazon.awssdk:dynamodb-enhanced:2.25.22")
+
+    implementation("org.redisson:redisson:3.28.0")
 }
 
 tasks.withType<Test> {
