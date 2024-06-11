@@ -3,8 +3,8 @@ config:
   http:
     timeout: 60
   phases:
-    - duration: 4
-      arrivalRate: 250
+    - duration: 5
+      arrivalRate: 1000
 
 scenarios:
   - name: "Get users"

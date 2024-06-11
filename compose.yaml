@@ -36,6 +36,30 @@ services:
       - "8081:8080"
     container_name: backend1.be
     depends_on: [ postgres, apigateway, redis-master ]
+  backend2:
+    build: .
+    ports:
+      - "8081:8080"
+    container_name: backend2.be
+    depends_on: [ postgres, apigateway, redis-master ]
+  backend3:
+    build: .
+    ports:
+      - "8081:8080"
+    container_name: backend3.be
+    depends_on: [ postgres, apigateway, redis-master ]
+  backend4:
+    build: .
+    ports:
+      - "8081:8080"
+    container_name: backend4.be
+    depends_on: [ postgres, apigateway, redis-master ]
+  backend5:
+    build: .
+    ports:
+      - "8081:8080"
+    container_name: backend5.be
+    depends_on: [ postgres, apigateway, redis-master ]
   postgres:
     build: ./src/main/resources/persistence
     environment:
